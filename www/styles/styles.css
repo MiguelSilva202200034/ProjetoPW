@@ -1,0 +1,97 @@
+:root {
+    --root-primary-color: #E3F2FD;
+    --root-secondary-color: #415A77;
+    --root-header-txt-color: #000000;
+    --root-span-txt-color: #ffffff;
+    --root-tertiary-color: #64B5F6;
+    --root-button-color: #2196F3;
+    --root-card-info-color: #cbc8c8;
+    --root-icon-size: 15rem;
+    --root-card-image-width: 31.25rem;
+    --root-card-image-height: 12.5rem;
+    --root-space: 1rem;
+    --root-half-space: calc(var(--root-space) / 2);
+    --root-quarter-space: calc(var(--root-space) / 4);
+    --root-double-space: calc(var(--root-space) * 2);
+    --root-border-radius: var(--root-space);
+    --root-max-width: 75rem;
+    --root-sidebar_footer-width: 70%;
+    --root-sidebar-max-width: 15%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 2 * var(--root-space));
+    width: calc(100% - 2 * var(--root-space));
+    margin: var(--root-space);
+    background-color: var(--root-primary-color);
+    font-family: Verdana, Helvetica, sans-serif;
+}
+
+header {
+    height: 10%;
+    max-height: 20%;
+    margin: 0;
+    color: var(--root-header-txt-color);
+    background-color: var(--root-tertiary-color);
+    border-radius: var(--root-border-radius);
+    text-align: left;
+}
+
+header h1 {
+    padding: var(--root-half-space);
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    background-color: var(--root-secondary-color);
+}
+
+span{
+    padding: var(--root-double-space);
+    color: var(--root-span-txt-color);
+    border: 1px solid black;
+}
+
+span :hover{
+    background-color: var(--root-secundary-color);
+}
+
+.area-list {
+    margin: 0;
+    padding: var(--root-space);
+    color: var(--root-secundary-color);
+    background-color: var(--root-secundary-color);
+}
+
+.area-list {
+    border-radius: 0 0 var(--root-border-radius) var(--root-border-radius);
+}
+
+.area-list {
+    padding: var(--root-double-space);
+    list-style-type: "\1F374";
+}
+
+.about-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.area-list {
+    text-align: center;
+}
+
+footer {
+    width: calc(100% - 2 * var(--root-space));
+    margin-top: auto;
+    padding: var(--root-space);
+    color: var(--root-secundary-color);
+    background-color: var(--root-tertiary-color);
+    border-radius: var(--root-border-radius);
+    text-align: center;
+    border-radius: 0 0 var(--root-border-radius) var(--root-border-radius);
+}
