@@ -4,19 +4,15 @@
     --root-header-txt-color: #000000;
     --root-span-txt-color: #ffffff;
     --root-tertiary-color: #64B5F6;
-    --root-button-color: #2196F3;
-    --root-card-info-color: #cbc8c8;
-    --root-icon-size: 15rem;
-    --root-card-image-width: 31.25rem;
-    --root-card-image-height: 12.5rem;
+    --root-span-hover-color: #374b63;
+    --root-td-color: #858e9e;
+    --root-background-color: #eee;
     --root-space: 1rem;
     --root-half-space: calc(var(--root-space) / 2);
-    --root-quarter-space: calc(var(--root-space) / 4);
     --root-double-space: calc(var(--root-space) * 2);
+    --root-border-style: solid;
+    --root-border-width: 1px;
     --root-border-radius: var(--root-space);
-    --root-max-width: 75rem;
-    --root-sidebar_footer-width: 70%;
-    --root-sidebar-max-width: 15%;
 }
 
 body {
@@ -32,7 +28,6 @@ body {
 header {
     height: 10%;
     max-height: 20%;
-    margin: 0;
     color: var(--root-header-txt-color);
     background-color: var(--root-tertiary-color);
     border-radius: var(--root-border-radius);
@@ -43,46 +38,99 @@ header h1 {
     padding: var(--root-half-space);
 }
 
-nav{
+#titleInstance {
+    text-align: center;
+}
+
+nav {
     display: flex;
     align-items: center;
     justify-content: left;
     background-color: var(--root-secondary-color);
+    border-radius: 0 0 var(--root-border-radius) var(--root-border-radius);
 }
 
-span{
-    padding: var(--root-double-space);
+nav:first-child {
+    border-radius: var(--root-border-radius) 0 0 var(--root-border-radius);
+}
+
+span {
+    padding: 1.25rem;
     color: var(--root-span-txt-color);
-    border: 1px solid black;
 }
 
-span :hover{
-    background-color: var(--root-secundary-color);
+span:hover {
+    cursor: pointer;
+    background-color: var(--root-span-hover-color);
+    border-radius: var(--root-border-radius);
 }
 
-.area-list {
+.mainContainer {
+    display: grid;
+    justify-content: center;
+    align-items: center;
     margin: 0;
     padding: var(--root-space);
     color: var(--root-secundary-color);
     background-color: var(--root-secundary-color);
 }
 
-.area-list {
-    border-radius: 0 0 var(--root-border-radius) var(--root-border-radius);
-}
-
-.area-list {
-    padding: var(--root-double-space);
-    list-style-type: "\1F374";
-}
-
-.about-link {
-    color: inherit;
-    text-decoration: none;
-}
-
-.area-list {
+.link {
+    display: none;
+    padding: var(--root-half-space);
+    margin: var(--root-space) var(--root-space) var(--root-space) 0;
+    color: var(--root-background-color);
+    background-color: var(--root-secondary-color);
+    border-radius: var(--root-border-radius);
+    cursor: pointer;
     text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#area-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--root-space) 0;
+    font-size: 1rem;
+    text-align: left;
+    border: var(--root-border-width) solid var(--root-secondary-color);
+}
+
+thead {
+    background-color: var(--root-secondary-color);
+    color: var(--root-span-txt-color);
+}
+
+thead th {
+    padding: var(--root-half-space);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+td,
+th {
+    padding: var(--root-half-space);
+    border: var(--root-border-width) solid var(--root-secondary-color);
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--root-td-color);
+}
+
+tbody tr:nth-child(odd) {
+    background-color: var(--root-primary-color);
+}
+
+tbody tr:hover {
+    background-color: var(--root-tertiary-color);
+    cursor: pointer;
 }
 
 footer {

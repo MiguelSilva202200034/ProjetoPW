@@ -4,30 +4,36 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Receitas</title>
+    <title>Clube de Ciclismo</title>
     <link rel="stylesheet" href="styles/styles.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <header>
         <h1>ESTS - Clube de Ciclismo</h1>
         <nav>
-            <span>Membros</span>
-            <span>Eventos</span>
-            <span>Tipos de Eventos</span>
+            <span id="buttonMembers">Membros</span>
+            <span id="buttonEvents">Eventos</span>
+            <span id="buttonTypeEvents">Tipos de Eventos</span>
         </nav>
     </header>
-
-    <main class="area-list">
-        <section>
-
+    <main class="mainContainer">
+        <h1 id="titleInstance"></h1>
+        <section id="area-list">
         </section>
+        <div class="buttons">
+            <a id="addButton" class="link"">Adicionar</a>
+            <a id="editButton" class="link"">Editar</a>
+            <a id="removeButton" class="link"">Remover</a>
+            <a id="saveButton" class="link" href="javascript: Menu.save();">Gravar</a>
+            <a id="cancelButton" class="link" href="javascript: Menu.cancel();">Cancelar</a>
+        </div>
     </main>
 
     <footer>
         2024 &copy; Escola Superior de Tecnologia de Setúbal &#x25CF; Programação para a Web
     </footer>
+    <script src="scripts/main.js"></script>
 </body>
 
 </html>
