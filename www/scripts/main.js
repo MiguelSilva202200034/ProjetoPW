@@ -115,6 +115,209 @@ class Table extends Viewable {
 }
 
 /**
+ * Classe Form
+ * @class Classe form para editar ou adicionar um Membro, Evento ou tipo de evento
+ */
+class Form extends Viewable {
+
+    /**
+     * @constructs Form
+     * Apenas chama o construtor da classe superior na hierarquia e cria um elemento html form
+     */
+    constructor() {
+        super("form");
+    }
+
+    /**
+     * Adiciona outro elemento ao form caso necessário
+     */
+    appendElementToForm(elem) {
+        this.element.appendChild(elem);
+    }
+
+    /**
+     * Preenche o formulário dependendo do tipo de formulário que é
+     * @throws {Error} Se não for implementado pela subclasse.
+     */
+    fillForm() {
+        throw new Error("O método 'fillForm' deve ser implementado na subclasse.");
+    }
+}
+
+/**
+ * Classe FormMember
+ * @class Classe form para editar ou adicionar um Membro
+ */
+class FormMember extends Form {
+    elements = {};
+    nameInput;
+    typeEvents;
+
+    /**
+     * @constructs FormMember
+     * Instancia os elementos próprios de um form para membros
+     */
+    constructor(elements) {
+        super();
+        this.elements = elements;
+        this.fillForm();
+    }
+
+    /**
+     * Preenche o formulário com os campos para um Membro
+     */
+    fillForm() {
+        let nameInputTag = this.elements.name.tag;
+        let nameInputType = this.elements.name.type;
+
+        let typeEventsTag = this.elements.typeEvents.tag;
+        let typeEventsType = this.elements.typeEvents.type;
+
+        let labelName = document.createElement("label");
+        labelName.textContent = Member.columns[1] + ": ";
+
+        this.nameInput = document.createElement(nameInputTag);
+        this.nameInput.type = nameInputType;
+        this.nameInput.id = this.elements.name.id;
+
+        this.appendElementToForm(labelName);
+        this.appendElementToForm(this.nameInput);
+        this.appendElementToForm(document.createElement("br"));
+        this.appendElementToForm(document.createElement("br"));
+        let title = document.createElement("h4");
+        title.textContent = "Tipos de eventos preferidos:";
+        this.appendElementToForm(title);
+        this.appendElementToForm(document.createElement("br"));
+
+        menu.typeEvents.forEach(e => {
+            let labelTypeEventDescription = document.createElement("label");
+            labelTypeEventDescription.textContent = e.getDescription();
+            let typeEventRadio = document.createElement(typeEventsTag);
+            typeEventRadio.type = typeEventsType;
+            typeEventRadio.textContent = e.getDescription();
+            typeEventRadio.value = e.getDescription();
+            typeEventRadio.name = this.elements.typeEvents.name;
+            this.appendElementToForm(typeEventRadio);
+            this.appendElementToForm(labelTypeEventDescription);
+            this.appendElementToForm(document.createElement("br"));
+        })
+    }
+
+}
+
+
+/**
+ * Classe FormEvent
+ * @class Classe form para editar ou adicionar um Evento
+ */
+class FormEvent extends Form {
+    elements;
+    descriptionInput;
+    datePickerDate;
+    selectType;
+
+    /**
+     * @constructs FormEvent
+     * Instancia os elementos próprios de um form para eventos
+     */
+    constructor(elements) {
+        super();
+        this.elements = elements;
+        this.fillForm();
+    }
+
+    /**
+     * Preenche o formulário com os campos para um Evento
+     */
+    fillForm() {
+        let descriptionInputTag = this.elements.description.tag;
+        let descriptionInputType = this.elements.description.type;
+
+        let datePickerDateTag = this.elements.date.tag;
+        let datePickerDateType = this.elements.date.type;
+
+        let selectTypeTag = this.elements.typeEvent.tag;
+
+
+        let labelDescription = document.createElement("label");
+        labelDescription.textContent = Event.columns[1] + ": ";
+        this.descriptionInput = document.createElement(descriptionInputTag);
+        this.descriptionInput.type = descriptionInputType;
+        this.descriptionInput.id = this.elements.description.id;
+
+        this.appendElementToForm(labelDescription);
+        this.appendElementToForm(this.descriptionInput);
+        this.appendElementToForm(document.createElement("br"));
+
+        let labelDatePicker = document.createElement("label");
+        labelDatePicker.textContent = Event.columns[2] + ": ";
+        this.datePickerDate = document.createElement(datePickerDateTag);
+        this.datePickerDate.type = datePickerDateType;
+        this.datePickerDate.id = this.elements.date.id;
+
+        this.appendElementToForm(labelDatePicker);
+        this.appendElementToForm(this.datePickerDate);
+        this.appendElementToForm(document.createElement("br"));
+
+        let labelSelect = document.createElement("label");
+        labelSelect.textContent = Event.columns[3] + ": ";
+        this.selectType = document.createElement(selectTypeTag);
+        this.selectType.id = this.elements.typeEvent.id;
+        for (var i = 0; i < menu.typeEvents.length; i++) {
+            var opt = menu.typeEvents[i].getDescription();
+            var el = document.createElement("option");
+            el.textContent = opt;
+            el.value = opt;
+            this.selectType.appendChild(el);
+        }
+        this.selectType.value = "";
+
+        this.appendElementToForm(labelSelect);
+        this.appendElementToForm(this.selectType);
+        this.appendElementToForm(document.createElement("br"));
+    }
+}
+
+
+/**
+ * Classe FormTypeEvent
+ * @class Classe form para editar ou adicionar um Tipo de Evento
+ */
+class FormTypeEvent extends Form {
+    elements;
+    descriptionInput;
+
+    /**
+     * @constructs FormTypeEvent
+     * Instancia os elementos próprios de um form para tipos de eventos
+     */
+    constructor(elements) {
+        super();
+        this.elements = elements;
+        this.fillForm();
+    }
+
+    /**
+     * Preenche o formulário com os campos para um Tipo de Evento
+     */
+    fillForm() {
+        let labelElement = document.createElement("label");
+        labelElement.textContent = TypeEvent.columns[1] + ": ";
+
+        let descriptionInputTag = this.elements.description.tag;
+        let descriptionInputType = this.elements.description.type;
+
+        this.descriptionInput = document.createElement(descriptionInputTag);
+        this.descriptionInput.type = descriptionInputType;
+        this.descriptionInput.id = this.elements.description.id;
+
+        this.appendElementToForm(labelElement);
+        this.appendElementToForm(this.descriptionInput);
+    }
+
+}
+
+/**
  * Classe Structure
  * @class Estrutura para representar ou um Member, ou um Event ou um TypeEvent
  */
@@ -153,7 +356,7 @@ class Structure {
     }
 
     /**
-     * Converte o objeto numa linha de tabela HTML (deve ser implementado pelas subclasses).
+     * Devolve os atributos de um objeto para serem convertidos em linha de tabela
      * @throws {Error} Se não for implementado pela subclasse.
      */
     toTrTd() {
@@ -169,15 +372,27 @@ class Member extends Structure {
     static columns = ["Id", "Nome"];
     name;
 
+    /**
+     * @constructs Member
+     * Incrementação do id em mais um pela chamada do super(), e inicializa o nome com o parametro do construtor
+     */
     constructor(name = "") {
         super();
         this.name = name;
     }
 
+    /**
+     * Retorna o ID do membro.
+     * @returns {number} ID do membro.
+     */
     getId() {
         return this.id;
     }
 
+    /**
+     * Devolve os seus atributos, id e nome para poderem ser convertidos para linha de uma tabela pelo objeto Table
+     * @throws {Error} Se não for implementado pela subclasse.
+     */
     toTrTd() {
         return [this.id, this.name];
     }
@@ -189,11 +404,15 @@ class Member extends Structure {
  */
 
 class Event extends Structure {
-    static columns = ["Id", "Nome", "Data", "Tipo de Evento"];
+    static columns = ["Id", "Descritivo", "Data", "Tipo de Evento"];
     name;
     date;
     typeEvent;
 
+    /**
+     * @constructs Event
+     * Incrementação do id em mais um pela chamada do super(), e inicializa o nome, date e typeEvent com os parametros do construtor
+     */
     constructor(name = "", date = "", typeEvent = "") {
         super();
         this.name = name;
@@ -201,10 +420,26 @@ class Event extends Structure {
         this.typeEvent = typeEvent;
     }
 
+    /**
+     * Retorna o ID do evento.
+     * @returns {number} ID do evento.
+     */
     getId() {
         return this.id;
     }
 
+    /**
+     * Retorna o Nome do evento.
+     * @returns {String} Nome do evento.
+     */
+    getName() {
+        return this.name;
+    }
+
+    /**
+     * Devolve os seus atributos, id, nome, data e tipo de evento para poderem ser convertidos para linha de uma tabela pelo objeto Table
+     * @throws {Error} Se não for implementado pela subclasse.
+     */
     toTrTd() {
         return [this.id, this.name, this.date, this.typeEvent];
     }
@@ -218,15 +453,36 @@ class Event extends Structure {
 class TypeEvent extends Structure {
     static columns = ["Id", "Descritivo"];
     description;
+
+    /**
+     * @constructs Event
+     * Incrementação do id em mais um pela chamada do super(), e inicializa o descritivo com o parametro do construtor
+     */
     constructor(description = "") {
         super();
         this.description = description;
     }
 
+    /**
+     * Retorna o ID do tipo de evento.
+     * @returns {number} ID do evento.
+     */
     getId() {
         return this.id;
     }
 
+    /**
+     * Retorna o descritivo do tipo evento.
+     * @returns {String} Descritivo do tipo de evento.
+     */
+    getDescription() {
+        return this.description;
+    }
+
+    /**
+     * Devolve os seus atributos, id e descritivo para poderem ser convertidos para linha de uma tabela pelo objeto Table
+     * @throws {Error} Se não for implementado pela subclasse.
+     */
     toTrTd() {
         return [this.id, this.description];
     }
@@ -256,14 +512,26 @@ class Menu {
         this.#typeEvents = [];
     }
 
+    /**
+     * Retorna o array de membros
+     * @returns {Array} array de membros.
+     */
     get members() {
         return this.#members;
     }
 
+    /**
+     * Retorna o array de eventos
+     * @returns {Array} array de eventos.
+     */
     get events() {
         return this.#events;
     }
 
+    /**
+     * Retorna o array de tipo de eventos
+     * @returns {Array} array de tipo de eventos.
+     */
     get typeEvents() {
         return this.#typeEvents;
     }
@@ -299,8 +567,14 @@ class Menu {
         }
     }
 
+    /**
+     * Remove um item do array escolhido
+     * @param {Number} rowIndex indice do elemento que quer ser retirado
+     * @param {CharacterData} typeOfData 'M' seleciona os members, 'E' seleciona os events e 'T' seleciona os tipos de eventos
+     * @returns tabela com os dados formatos
+     */
     remove(rowIndex, typeOfData) {
-        switch(typeOfData){
+        switch (typeOfData) {
             case 'M':
                 this.#members.splice(rowIndex, 1);
                 break;
@@ -314,7 +588,25 @@ class Menu {
                 throw new Error("Tipo de dados desconhecido.");
         }
     }
+
+    add(typeOfData, ...args) {
+        switch (typeOfData) {
+            case 'M':
+                this.#members.push(new Member(args[0]))
+                break;
+            case 'E':
+                this.#events.push(new Event(args[0], args[1], args[2]));
+                break;
+            case 'T':
+                this.#typeEvents.push(new TypeEvent(args[0]));
+                break;
+            default:
+                throw new Error("Tipo de dados desconhecido.");
+        }
+    }
 }
+
+let area = document.getElementById("area-list");
 
 const menu = new Menu();
 
@@ -331,10 +623,6 @@ menu.events.push(new Event("Concerto", "2024-12-01", "Diversão"));
 menu.typeEvents.push(new TypeEvent("Competição"));
 menu.typeEvents.push(new TypeEvent("Escola"));
 menu.typeEvents.push(new TypeEvent("Diversão"));
-
-console.log(menu.members);
-console.log(menu.events);
-console.log(menu.typeEvents);
 
 let tableMembers = menu.toTable(menu.members);
 let tableEvents = menu.toTable(menu.events);
@@ -374,42 +662,124 @@ document.querySelectorAll("tbody tr").forEach(tr => {
     tr.addEventListener("click", () => captureRowIndex(tr));
 });
 
+document.getElementById("addButton").addEventListener("click", () => {
+    let form;
+    switch (selectedTypeObject) {
+        case "M":
+            form = new FormMember({
+                name: {
+                    tag: "input",
+                    type: "text",
+                    id: "nameMember"
+                },
+                typeEvents: {
+                    tag: "input",
+                    type: "checkbox",
+                    name: "typesEvents"
+                }
+            });
+            break;
+        case "E":
+            form = new FormEvent({
+                description: {
+                    tag: "input",
+                    type: "text",
+                    id: "descriptionEvent"
+                },
+                date: {
+                    tag: "input",
+                    type: "date",
+                    id: "dateEvent"
+                },
+                typeEvent: {
+                    tag: "select",
+                    id: "typeEvent"
+                }
+            });
+            break;
+        case "T":
+            form = new FormTypeEvent({
+                description: {
+                    tag: "input",
+                    type: "text",
+                    id: "descriptionTypeEvent"
+                }
+            });
+            break;
+        default:
+            throw new Error("Tipo de dados desconhecido.");
+    }
+    form.show(area);
+    showFormButtons();
+})
+
+document.getElementById("saveButton").addEventListener("click", () => {
+    if (selectedTypeObject === "T") {
+        const val = document.getElementById("descriptionTypeEvent").value;
+        if (val === "") {
+            alert("O campo descrição do tipo de evento não pode estar vazio.");
+            return;
+        }
+        menu.add(selectedTypeObject, val);
+        tableTypeEvents = menu.toTable(menu.typeEvents);
+        tableTypeEvents.show(area);
+        showMainButtons();
+    } else if (selectedTypeObject === "E") {
+        const val = document.getElementById("descriptionEvent").value;
+        const date = document.getElementById("dateEvent").value;
+        const typeEvent = document.getElementById("typeEvent").value;
+        if (val === "" || date === "" || typeEvent === "") {
+            alert("Preencha todos os campos.");
+            return;
+        }
+        menu.add(selectedTypeObject, val, date, typeEvent);
+        tableEvents = menu.toTable(menu.events);
+        tableEvents.show(area);
+        showMainButtons();
+    } else if (selectedTypeObject === "M") {
+        const name = document.getElementById("nameMember").value;
+        const checkBoxes = document.querySelectorAll('input[name="typesEvents"]:checked');
+        const favTypesEvents = Array.from(checkBoxes).map(checkbox => checkbox.value);
+        if (name === "" || favTypesEvents.length === 0) {
+            alert("Preencha todos os campos.");
+            return;
+        }
+        menu.add(selectedTypeObject, name, favTypesEvents);
+        tableMembers = menu.toTable(menu.members);
+        tableMembers.show(area);
+        showMainButtons();
+    }
+})
+
+document.getElementById("cancelButton").addEventListener("click", () => {
+    selectedTypeObject === "M" ? tableMembers.show(area)
+        : selectedTypeObject === "E" ? tableEvents.show(area) : tableTypeEvents.show(area);
+})
+
 document.getElementById("buttonMembers").addEventListener("click", () => {
-    selectedTypeObject = "Membro";
+    selectedTypeObject = "M";
     showMainButtons();
     document.getElementById("titleInstance").textContent = "Membros";
-    tableMembers.show(document.getElementById("area-list"));
+    tableMembers.show(area);
 })
 
 document.getElementById("buttonEvents").addEventListener("click", () => {
-    selectedTypeObject = "Evento";
+    selectedTypeObject = "E";
     showMainButtons();
     document.getElementById("titleInstance").textContent = "Eventos";
-    tableEvents.show(document.getElementById("area-list"));
+    tableEvents.show(area);
 })
 
 document.getElementById("buttonTypeEvents").addEventListener("click", () => {
-    selectedTypeObject = "TipoEvento";
+    selectedTypeObject = "T";
     showMainButtons();
     document.getElementById("titleInstance").textContent = "Tipos de Eventos";
-    tableTypeEvents.show(document.getElementById("area-list"));
+    tableTypeEvents.show(area);
 })
 
 document.getElementById("removeButton").addEventListener("click", () => {
     if (highlightedRow) {
-        switch (selectedTypeObject) {
-            case "Membro":
-                menu.remove(rowIndex-1, 'M');
-                break;
-            case "Evento":
-                menu.remove(rowIndex-1, 'E');
-                break;
-            case "TipoEvento":
-                menu.remove(rowIndex-1, 'T');
-                break;
-            default:
-                console.log("type not removed!, " + menu.length);
-        }
+        menu.remove(rowIndex - 1, selectedTypeObject);
         highlightedRow.parentNode.removeChild(highlightedRow);
     } else {
         alert("Selecione uma linha para remover");
