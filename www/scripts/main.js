@@ -8,6 +8,8 @@
 let highlightedRow = null;
 let rowIndex;
 let selectedTypeObject;
+let isEditMode = false;
+let tempId;
 
 /**
  * Classe Viewable
@@ -151,7 +153,7 @@ class Form extends Viewable {
 class FormMember extends Form {
     elements = {};
     nameInput;
-    typeEvents;
+    typeEventCheckboxes = [];
 
     /**
      * @constructs FormMember
@@ -161,6 +163,10 @@ class FormMember extends Form {
         super();
         this.elements = elements;
         this.fillForm();
+    }
+
+    setNameInputValue(value) {
+        this.nameInput.value = value;
     }
 
     /**
@@ -192,17 +198,31 @@ class FormMember extends Form {
         menu.typeEvents.forEach(e => {
             let labelTypeEventDescription = document.createElement("label");
             labelTypeEventDescription.textContent = e.getDescription();
-            let typeEventRadio = document.createElement(typeEventsTag);
-            typeEventRadio.type = typeEventsType;
-            typeEventRadio.textContent = e.getDescription();
-            typeEventRadio.value = e.getDescription();
-            typeEventRadio.name = this.elements.typeEvents.name;
-            this.appendElementToForm(typeEventRadio);
+
+            let typeEventCheckbox = document.createElement(typeEventsTag);
+
+            typeEventCheckbox.type = typeEventsType;
+            typeEventCheckbox.textContent = e.getDescription();
+            typeEventCheckbox.value = e.getDescription();
+
+            this.typeEventCheckboxes.push(typeEventCheckbox);
+
+            typeEventCheckbox.name = this.elements.typeEvents.name;
+            this.appendElementToForm(typeEventCheckbox);
             this.appendElementToForm(labelTypeEventDescription);
             this.appendElementToForm(document.createElement("br"));
         })
     }
 
+    /**
+     * Define os checkboxes ativados com base nos nomes fornecidos
+     * @param {Array} preferredNames - Lista de descrições dos tipos de eventos que devem ser ativados
+     */
+    setPreferredTypeEvents(preferredNames) {
+        this.typeEventCheckboxes.forEach(checkbox => {
+            checkbox.checked = preferredNames.includes(checkbox.value);
+        });
+    }
 }
 
 
@@ -224,6 +244,18 @@ class FormEvent extends Form {
         super();
         this.elements = elements;
         this.fillForm();
+    }
+
+    setDescriptionInputContent(description) {
+        this.descriptionInput.value = description;
+    }
+
+    setDatePickerValue(value) {
+        this.datePickerDate.value = value;
+    }
+
+    setValueSelectType(value) {
+        this.selectType.value = value;
     }
 
     /**
@@ -297,6 +329,10 @@ class FormTypeEvent extends Form {
         this.fillForm();
     }
 
+    setDescriptionInputContent(description) {
+        this.descriptionInput.value = description;
+    }
+
     /**
      * Preenche o formulário com os campos para um Tipo de Evento
      */
@@ -314,7 +350,6 @@ class FormTypeEvent extends Form {
         this.appendElementToForm(labelElement);
         this.appendElementToForm(this.descriptionInput);
     }
-
 }
 
 /**
@@ -371,14 +406,16 @@ class Structure {
 class Member extends Structure {
     static columns = ["Id", "Nome"];
     name;
+    favTypesEvents;
 
     /**
      * @constructs Member
      * Incrementação do id em mais um pela chamada do super(), e inicializa o nome com o parametro do construtor
      */
-    constructor(name = "") {
+    constructor(name = "", favTypesEvents = []) {
         super();
         this.name = name;
+        this.favTypesEvents = favTypesEvents;
     }
 
     /**
@@ -387,6 +424,38 @@ class Member extends Structure {
      */
     getId() {
         return this.id;
+    }
+
+    /**
+     * Determina um novo id
+     * @param {number} ID do membro.
+     */
+    setId(id) {
+        this.id = id;
+    }
+
+    /**
+     * Retorna os eventos preferidos do membro
+     * @returns {Array} Array de eventos preferidos.
+     */
+    get favTypesEvents() {
+        return this.favTypesEvents;
+    }
+
+    /**
+     * Adiciona um evento aos eventos preferidos
+     * @returns {TypeEvent} Evento preferido
+     */
+    addFavTypeEvent(favTypeEvent) {
+        this.favTypesEvents.push(favTypeEvent);
+    }
+
+    /**
+     * Retorna o Nome do membro
+     * @returns {String} Nome do membro.
+     */
+    getName() {
+        return this.name;
     }
 
     /**
@@ -429,6 +498,14 @@ class Event extends Structure {
     }
 
     /**
+     * Determina um novo id
+     * @param {number} ID do evento.
+     */
+    setId(id) {
+        this.id = id;
+    }
+
+    /**
      * Retorna o Nome do evento.
      * @returns {String} Nome do evento.
      */
@@ -465,10 +542,18 @@ class TypeEvent extends Structure {
 
     /**
      * Retorna o ID do tipo de evento.
-     * @returns {number} ID do evento.
+     * @returns {number} ID do tipo de evento.
      */
     getId() {
         return this.id;
+    }
+
+    /**
+     * Determina um novo id
+     * @param {number} ID do tipo de evento.
+     */
+    setId(id) {
+        this.id = id;
     }
 
     /**
@@ -502,6 +587,7 @@ class Menu {
     #members;
     #events;
     #typeEvents;
+    #registrationsMembersEvents;
     /**
      * @constructs Menu
      * Instancia os arrays de membros, eventos e tipos de eventos para um array inicialmente vazio
@@ -589,20 +675,74 @@ class Menu {
         }
     }
 
-    add(typeOfData, ...args) {
+    /**
+     * Manipula dados para adição ou edição
+     * @param {string} typeOfData - Tipo de dado ('M', 'E', 'T')
+     * @param {Array} args - Argumentos necessários para criar ou modificar o item
+     * @param {boolean} isEdit - Indica se a operação é uma edição
+     * @param {Number|null} id - ID do item para edição (somente para edição)
+     */
+    #handleDataOperation(typeOfData, args, isEdit = false, id = null) {
+        let collection;
+        let instance;
+
         switch (typeOfData) {
             case 'M':
-                this.#members.push(new Member(args[0]))
+                collection = this.#members;
+                instance = new Member(args[0], args[1]);
                 break;
             case 'E':
-                this.#events.push(new Event(args[0], args[1], args[2]));
+                collection = this.#events;
+                instance = new Event(args[0], args[1], args[2]);
                 break;
             case 'T':
-                this.#typeEvents.push(new TypeEvent(args[0]));
+                collection = this.#typeEvents;
+                instance = new TypeEvent(args[0]);
                 break;
             default:
                 throw new Error("Tipo de dados desconhecido.");
         }
+
+        if (isEdit) {
+            const index = --id;
+            if (index > collection.length || index < 0) { throw new Error("Item não encontrado."); };
+            let oldId = collection[index].getId();
+            instance.setId(oldId);
+            collection[index] = instance;
+        } else {
+            collection.push(instance);
+        }
+    }
+
+    /**
+     * Adiciona um item ao array correspondente
+     * @param {string} typeOfData - Tipo de dado ('M', 'E', 'T')
+     * @param {...any} args - Argumentos necessários para criar o item
+     */
+    add(typeOfData, ...args) {
+        switch (typeOfData) {
+            case 'M':
+                this.members.push(new Member(args[0], args[1]));
+                break;
+            case 'E':
+                this.events.push(new Event(args[0], args[1], args[2]));
+                break;
+            case 'T':
+                this.typeEvents.push(new TypeEvent(args[0]));
+                break;
+            default:
+                throw new Error("Tipo de dados desconhecido.");
+        }
+    }
+
+    /**
+     * Edita um item no array correspondente
+     * @param {string} typeOfData - Tipo de dado ('M', 'E', 'T')
+     * @param {Number} id - ID do item a ser editado
+     * @param {...any} args - Novos valores para o item
+     */
+    edit(typeOfData, id, ...args) {
+        this.#handleDataOperation(typeOfData, args, true, id);
     }
 }
 
@@ -623,6 +763,9 @@ menu.events.push(new Event("Concerto", "2024-12-01", "Diversão"));
 menu.typeEvents.push(new TypeEvent("Competição"));
 menu.typeEvents.push(new TypeEvent("Escola"));
 menu.typeEvents.push(new TypeEvent("Diversão"));
+
+menu.members[0].addFavTypeEvent(menu.typeEvents[0].getDescription());
+console.log(`O membro : ${menu.members[0].getName()} tem os tipos de eventos: ${menu.members[0].favTypesEvents.map(tE => tE)}`);
 
 let tableMembers = menu.toTable(menu.members);
 let tableEvents = menu.toTable(menu.events);
@@ -662,7 +805,7 @@ document.querySelectorAll("tbody tr").forEach(tr => {
     tr.addEventListener("click", () => captureRowIndex(tr));
 });
 
-document.getElementById("addButton").addEventListener("click", () => {
+function executeForStructures() {
     let form;
     switch (selectedTypeObject) {
         case "M":
@@ -709,6 +852,36 @@ document.getElementById("addButton").addEventListener("click", () => {
         default:
             throw new Error("Tipo de dados desconhecido.");
     }
+    return form;
+}
+
+function loadFormMemberEvent(form) {
+    let title = document.createElement("h2");
+    title.textContent = "Eventos Inscrito";
+
+    let registerTournamentButton = document.createElement("a");
+    let unregisterTournamentButton = document.createElement("a");
+
+    registerTournamentButton.className = "link";
+    unregisterTournamentButton.className = "link";
+
+    registerTournamentButton.id = "registerButton";
+    unregisterTournamentButton.id = "unregisterButton";
+
+    registerTournamentButton.textContent = "Inscrever em Evento";
+    unregisterTournamentButton.textContent = "Desinscrever de Evento";
+
+    registerTournamentButton.style = "display: inline-block"
+    unregisterTournamentButton.style = "display: inline-block"
+
+    form.appendElementToForm(title);
+    form.appendElementToForm(tableEvents.element);
+    form.appendElementToForm(registerTournamentButton);
+    form.appendElementToForm(unregisterTournamentButton);
+}
+
+document.getElementById("addButton").addEventListener("click", () => {
+    let form = executeForStructures();
     form.show(area);
     showFormButtons();
 })
@@ -720,7 +893,7 @@ document.getElementById("saveButton").addEventListener("click", () => {
             alert("O campo descrição do tipo de evento não pode estar vazio.");
             return;
         }
-        menu.add(selectedTypeObject, val);
+        (!isEditMode) ? menu.add(selectedTypeObject, val) : menu.edit(selectedTypeObject, tempId, val);
         tableTypeEvents = menu.toTable(menu.typeEvents);
         tableTypeEvents.show(area);
         showMainButtons();
@@ -732,7 +905,7 @@ document.getElementById("saveButton").addEventListener("click", () => {
             alert("Preencha todos os campos.");
             return;
         }
-        menu.add(selectedTypeObject, val, date, typeEvent);
+        (!isEditMode) ? menu.add(selectedTypeObject, val, date, typeEvent) : menu.edit(selectedTypeObject, tempId, val, date, typeEvent);
         tableEvents = menu.toTable(menu.events);
         tableEvents.show(area);
         showMainButtons();
@@ -744,7 +917,7 @@ document.getElementById("saveButton").addEventListener("click", () => {
             alert("Preencha todos os campos.");
             return;
         }
-        menu.add(selectedTypeObject, name, favTypesEvents);
+        (!isEditMode) ? menu.add(selectedTypeObject, name, favTypesEvents) : menu.edit(selectedTypeObject, tempId, name, favTypesEvents);
         tableMembers = menu.toTable(menu.members);
         tableMembers.show(area);
         showMainButtons();
@@ -754,6 +927,7 @@ document.getElementById("saveButton").addEventListener("click", () => {
 document.getElementById("cancelButton").addEventListener("click", () => {
     selectedTypeObject === "M" ? tableMembers.show(area)
         : selectedTypeObject === "E" ? tableEvents.show(area) : tableTypeEvents.show(area);
+    showMainButtons();
 })
 
 document.getElementById("buttonMembers").addEventListener("click", () => {
@@ -784,4 +958,51 @@ document.getElementById("removeButton").addEventListener("click", () => {
     } else {
         alert("Selecione uma linha para remover");
     }
+})
+
+document.getElementById("editButton").addEventListener("click", () => {
+    if (highlightedRow) {
+        if (selectedTypeObject === "T") {
+            const id = highlightedRow.cells[0].textContent;
+            const name = highlightedRow.cells[1].textContent;
+            const form = executeForStructures();
+            form.setDescriptionInputContent(name);
+            tempId = id;
+            isEditMode = true;
+            form.show(area);
+            showFormButtons();
+        } else if (selectedTypeObject === "E") {
+            const id = highlightedRow.cells[0].textContent;
+            const description = highlightedRow.cells[1].textContent;
+            const date = highlightedRow.cells[2].textContent;
+            const typeEvent = highlightedRow.cells[3].textContent;
+            const form = executeForStructures();
+            form.setDescriptionInputContent(description);
+            form.setDatePickerValue(date);
+            form.setValueSelectType(typeEvent);
+            tempId = id;
+            isEditMode = true;
+            form.show(area);
+            showFormButtons();
+        } else if (selectedTypeObject === "M") {
+            const id = highlightedRow.cells[0].textContent;
+            const name = highlightedRow.cells[1].textContent;
+            const form = executeForStructures();
+            if (selectedTypeObject === "M") {
+                loadFormMemberEvent(form);
+            }
+            form.setNameInputValue(name);
+            tempId = id;
+            let localId = id;
+            console.log(--localId);
+            let arrFavTypesMember = menu.members[localId].favTypesEvents;
+            form.setPreferredTypeEvents(arrFavTypesMember);
+            isEditMode = true;
+            form.show(area);
+            showFormButtons();
+        }
+    } else {
+        alert("Selecione uma linha para remover ou editar")
+    }
+
 })
